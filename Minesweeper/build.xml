@@ -1,0 +1,45 @@
+<project name="Minesweeper" basedir="." default="build">
+   <property name="src" value="src"/>
+   <property name="build" value="classes"/>
+   <property name="release" value="release"/>
+   <property name="lib" value="lib"/>
+   <property name="jar" value="KeyMinesweeper.jar"/>
+
+   <target name="build" depends="init,compile,expandJars,dist,clean"/>
+   <!--<target name="build" depends="init,compile,expandJars,dist"/>-->
+
+    <target name="init">
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile">
+        <javac srcdir="${src}" destdir="${build}"  classpathref="libraries"/>
+    </target>
+
+    <target name="dist">
+        <jar jarfile="${jar}"  basedir="${build}">
+            <manifest>
+                <attribute name="Main-Class" value="msweeper.Main"/>
+            </manifest>
+            <fileset dir="images">
+                <include name="**/*.jpg"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build}"/>
+    </target>
+
+    <path id="libraries">
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+
+   <target name="expandJars">
+      <copy file="MANIFEST.MF" todir="build/META-INF" overwrite="true"/>
+   </target>
+</project>
+
