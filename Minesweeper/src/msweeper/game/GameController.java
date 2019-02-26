@@ -32,10 +32,12 @@ public class GameController {
         return board;
     }
 
-    public boolean isSelected(int x, int y) {
-        if (x == locationX && y == locationY)
-            return true;
-        return false;
+    public int getLocationX() {
+        return locationX;
+    }
+
+    public int getLocationY() {
+        return locationY;
     }
 
     public void onLeft() {

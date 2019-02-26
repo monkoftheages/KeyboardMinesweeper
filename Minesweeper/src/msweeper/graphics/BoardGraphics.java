@@ -14,11 +14,16 @@ public class BoardGraphics extends JPanel {
     protected GameFrame parent;
     public static final Color RED_TRANSPARENT = new Color(1, 0, 0, .5f);
     public static final int BOTTOM_PANEL_HEIGHT = 37;
+    protected BufferedImage offscreen;
+    protected Graphics2D offscreenGraphics;
 
     public BoardGraphics(GameFrame parent) {
         this.parent = parent;
-        PREF_W = Board.WIDTH * 15;
-        PREF_H = Board.HEIGHT * 15 + BOTTOM_PANEL_HEIGHT;
+        PREF_W = Board.WIDTH * Unit.SQUARE_SIZE;
+        PREF_H = Board.HEIGHT * Unit.SQUARE_SIZE + BOTTOM_PANEL_HEIGHT;
+        offscreen = new BufferedImage(PREF_W, PREF_H, BufferedImage.TYPE_INT_ARGB);
+        offscreenGraphics = offscreen.createGraphics();
+        drawGameLive(offscreenGraphics);
     }
 
     public Dimension getPreferredSize() {
@@ -28,39 +33,30 @@ public class BoardGraphics extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2_component = (Graphics2D) g;
-        BufferedImage offscreen = new BufferedImage(PREF_W, PREF_H, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = offscreen.createGraphics();
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, PREF_W, PREF_H);
-        g2.setColor(RED_TRANSPARENT);
+        offscreenGraphics.setColor(Color.BLACK);
+        offscreenGraphics.fillRect(0, 0, PREF_W, PREF_H);
         if(!parent.getController().isGameOver())
-            drawGameLive(g2);
+            drawGameLive(offscreenGraphics);
         else
-            drawGameOver(g2);
-        drawMinesLeft(g2, parent.getBoard().getNumberOfMinesRemaining());
+            drawGameOver(offscreenGraphics);
+        offscreenGraphics.setColor(RED_TRANSPARENT);
+        drawRect(offscreenGraphics, parent.getController().getLocationX() * Unit.SQUARE_SIZE, parent.getController().getLocationY() * Unit.SQUARE_SIZE, Unit.SQUARE_SIZE, Unit.SQUARE_SIZE);
+        drawMinesLeft(offscreenGraphics, parent.getBoard().getNumberOfMinesRemaining());
         g2_component.drawImage(offscreen, 0, 0, getWidth(), getHeight(), null);
-        g2.dispose();
     }
 
     protected void drawGameLive(Graphics2D g2) {
         Unit[][] board = parent.getBoard().getBoardUnits();
         for (int w = 0; w < board.length; w++)
-            for (int h = 0; h < board[0].length; h++) {
+            for (int h = 0; h < board[0].length; h++)
                 g2.drawImage(board[w][h].getGraphic(), board[w][h].getImageX(), board[w][h].getImageY(), null);
-                if (parent.getController().isSelected(w, h))
-                    drawRect(g2, w * 15, h * 15, 15, 15);
-            }
     }
 
     protected void drawGameOver(Graphics2D g2) {
         Unit[][] board = parent.getBoard().getBoardUnits();
         for (int w = 0; w < board.length; w++)
-            for (int h = 0; h < board[0].length; h++) {
+            for (int h = 0; h < board[0].length; h++)
                 g2.drawImage(board[w][h].getGraphicGameOver(), board[w][h].getImageX(), board[w][h].getImageY(), null);
-                if (parent.getController().isSelected(w, h))
-                    drawRect(g2, w * 15, h * 15, 15, 15);
-            }
-
     }
 
     protected void drawMinesLeft(Graphics2D g2, int minesLeft) {
@@ -69,7 +65,7 @@ public class BoardGraphics extends JPanel {
         int ones = minesLeft % 10;
         int tens = (minesLeft / 10) % 10;
         int hundreds = (minesLeft / 100) % 10;
-        int startingHeight = Board.HEIGHT * 15 + 4;
+        int startingHeight = Board.HEIGHT * Unit.SQUARE_SIZE + 4;
         int startingX = 15;
         g2.drawImage(UnitGraphics.MINE_DISPLAY_NUMBER[hundreds], startingX, startingHeight, 23, 30, null);
         g2.drawImage(UnitGraphics.MINE_DISPLAY_NUMBER[tens], startingX + 23, startingHeight, 23, 30, null);
